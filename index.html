@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeFi Interface</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .contract-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px 0;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        input {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        #tokens {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        #tokens > div {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .function-container {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .result-div {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>DeFi Interface</h1>
+    <button id="connectButton">Connect Wallet</button>
+
+    <div id="contracts">
+        <div class="contract-section">
+            <h2>AMM Contract</h2>
+            <div>
+                <p>Address: 0x5B4D751C5520417A69A45116dE290972Ef0F2aaA</p>
+                <div id="amm-functions"></div>
+            </div>
+        </div>
+
+        <div class="contract-section">
+            <h2>Twitter Contract</h2>
+            <div>
+                <p>Address: 0xa0fea47c50d937311a6594f4f2bae413300c1913</p>
+                <div id="twitter-functions"></div>
+            </div>
+        </div>
+
+        <div class="contract-section">
+            <h2>Trading Contract</h2>
+            <div>
+                <p>Address: 0x156cbcb31e8234a2a159909049aeb5f4156ddd61</p>
+                <div id="trading-functions"></div>
+            </div>
+        </div>
+
+        <div class="contract-section">
+            <h2>Voting Contract</h2>
+            <div>
+                <p>Address: 0x49c30BE60EcCB71a905c3E02fb63F34ceBfda924</p>
+                <div id="voting-functions"></div>
+            </div>
+        </div>
+
+        <div class="contract-section">
+            <h2>Counter Contract</h2>
+            <div>
+                <p>Address: 0xaAb3936e1505F06a8700a8f7B1218D2015B682C8</p>
+                <div id="counter-functions"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="contract-section">
+        <h2>Tokens</h2>
+        <div id="tokens">
+            <div>
+                <h3>$MAD</h3>
+                <p>0x7b818ea33426b1324cbfbc0450600c0510c99748</p>
+            </div>
+            <div>
+                <h3>$BOOM</h3>
+                <p>0x3a0b07e58b7b63ae10b9b89fd83fc413f6312b64</p>
+            </div>
+            <div>
+                <h3>$ZOO</h3>
+                <p>0x051df65d05e04062dbbd8dfb7f21752e2ca5449a</p>
+            </div>
+            <div>
+                <h3>$PEEL</h3>
+                <p>0x541ad6c548ffe82779bcc35302435f5a0e30a8cc</p>
+            </div>
+            <div>
+                <h3>$JUNK</h3>
+                <p>0x7389ddd79d8b22d1de5384c8fc8fa1ac80ac4532</p>
+            </div>
+            <div>
+                <h3>$MATE</h3>
+                <p>0xa624b34aa8de364328d03e2b0e827ca9c51156e5</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CONTRACT_ABIS = {
+            "0x5B4D751C5520417A69A45116dE290972Ef0F2aaA": [{"inputs":[{"internalType":"address","name":"_tokenA","type":"address"},{"internalType":"address","name":"_tokenB","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"uint256","name":"amountA","type":"uint256"},{"internalType":"uint256","name":"amountB","type":"uint256"}],"name":"addLiquidity","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_token","type":"address"}],"name":"getPrice","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}],
+            
+            "0xa0fea47c50d937311a6594f4f2bae413300c1913": [{"inputs":[{"internalType":"string","name":"_tweet","type":"string"}],"name":"createTweet","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_owner","type":"address"}],"name":"getAllTweets","outputs":[{"components":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"author","type":"address"},{"internalType":"string","name":"content","type":"string"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"uint256","name":"likes","type":"uint256"}],"internalType":"struct Twitter.Tweet[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"}],
+            
+            "0x156cbcb31e8234a2a159909049aeb5f4156ddd61": [{"inputs":[],"name":"getBalance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getCollectedFees","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"deposit","outputs":[],"stateMutability":"nonpayable","type":"function"}],
+            
+            "0x49c30BE60EcCB71a905c3E02fb63F34ceBfda924": [{"inputs":[{"internalType":"uint256","name":"candidateId","type":"uint256"},{"internalType":"string","name":"name","type":"string"}],"name":"addCandidate","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"registerUser","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"candidateId","type":"uint256"}],"name":"vote","outputs":[],"stateMutability":"nonpayable","type":"function"}],
+            
+            "0xaAb3936e1505F06a8700a8f7B1218D2015B682C8": [{"inputs":[],"name":"getCurrent","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"increment","outputs":[],"stateMutability":"nonpayable","type":"function"}]
+        };
+
+        let web3;
+
+        document.getElementById('connectButton').onclick = async () => {
+            if (window.ethereum) {
+                try {
+                    web3 = new Web3(window.ethereum);
+                    await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    document.getElementById('connectButton').textContent = 'Connected';
+                    initializeContracts();
+                } catch (error) {
+                    console.error('Error connecting to MetaMask:', error);
+                    alert('Failed to connect to MetaMask!');
+                }
+            } else {
+                alert('Please install MetaMask!');
+            }
+        };
+
+        function createFunctionInterface(contractAddress, functionAbi) {
+            const container = document.createElement('div');
+            container.className = 'function-container';
+            
+            const button = document.createElement('button');
+            button.textContent = functionAbi.name;
+            container.appendChild(button);
+
+            if (functionAbi.inputs) {
+                const inputsDiv = document.createElement('div');
+                functionAbi.inputs.forEach((input, index) => {
+                    const inputElement = document.createElement('input');
+                    inputElement.placeholder = `${input.name} (${input.type})`;
+                    inputElement.id = `${functionAbi.name}_${index}`;
+                    inputsDiv.appendChild(inputElement);
+                });
+                container.appendChild(inputsDiv);
+            }
+
+            const resultDiv = document.createElement('div');
+            resultDiv.className = 'result-div';
+            container.appendChild(resultDiv);
+
+            button.onclick = async () => {
+                try {
+                    const contract = new web3.eth.Contract(CONTRACT_ABIS[contractAddress], contractAddress);
+                    const accounts = await web3.eth.getAccounts();
+                    const params = [];
+
+                    if (functionAbi.inputs) {
+                        functionAbi.inputs.forEach((_, index) => {
+                            params.push(document.getElementById(`${functionAbi.name}_${index}`).value);
+                        });
+                    }
+
+                    let result;
+                    if (functionAbi.stateMutability === 'view') {
+                        result = await contract.methods[functionAbi.name](...params).call();
+                        resultDiv.textContent = `Result: ${result}`;
+                    } else {
+                        result = await contract.methods[functionAbi.name](...params).send({ from: accounts[0] });
+                        resultDiv.textContent = 'Transaction sent!';
+                    }
+                } catch (error) {
+                    resultDiv.textContent = `Error: ${error.message}`;
+                }
+            };
+
+            return container;
+        }
+
+        function initializeContracts() {
+            Object.entries(CONTRACT_ABIS).forEach(([address, abi]) => {
+                const functions = abi.filter(item => item.type === 'function');
+                const contractId = {
+                    "0x5B4D751C5520417A69A45116dE290972Ef0F2aaA": "amm",
+                    "0xa0fea47c50d937311a6594f4f2bae413300c1913": "twitter",
+                    "0x156cbcb31e8234a2a159909049aeb5f4156ddd61": "trading",
+                    "0x49c30BE60EcCB71a905c3E02fb63F34ceBfda924": "voting",
+                    "0xaAb3936e1505F06a8700a8f7B1218D2015B682C8": "counter"
+                }[address];
+
+                const functionContainer = document.getElementById(`${contractId}-functions`);
+                functions.forEach(func => {
+                    functionContainer.appendChild(createFunctionInterface(address, func));
+                });
+            });
+        }
+    </script>
+</body>
+</html>
